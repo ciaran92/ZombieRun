@@ -22,7 +22,7 @@ public class GameState extends State {
     private Buttons btnLeft, btnRight;
 
     boolean flag = false;
-    DoWork doWork;
+    //DoWork doWork;
     int count = 0;
 
     @Override
@@ -35,6 +35,7 @@ public class GameState extends State {
 
     @Override
     public void update() {
+        thePlayer.update();
     }
 
     @Override
@@ -99,6 +100,28 @@ public class GameState extends State {
         String method;
         if (e.getAction() == MotionEvent.ACTION_DOWN) {
             btnLeft.onTouch(scaledX, scaledY);
+            if(btnLeft.isBtnPressed(scaledX,scaledY)){
+                if(!thePlayer.jumping){
+                    thePlayer.jumping = true;
+                    thePlayer.gravity = 10.0;
+                }
+            }
+        }
+        if(e.getAction() == MotionEvent.ACTION_UP){
+            btnLeft.cancel();
+        }
+        else{
+            thePlayer.update();
+        }
+
+        return true;
+    }
+
+    /*@Override
+    public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
+        String method;
+        if (e.getAction() == MotionEvent.ACTION_DOWN) {
+            btnLeft.onTouch(scaledX, scaledY);
             btnRight.onTouch(scaledX, scaledY);
             if(btnLeft.isBtnPressed(scaledX,scaledY)){
                 flag = true;
@@ -122,10 +145,10 @@ public class GameState extends State {
         }
 
         return true;
-    }
+    }*/
 
 
-    class DoWork extends AsyncTask<String, Void, Void> {
+    /*class DoWork extends AsyncTask<String, Void, Void> {
 
 
         @Override
@@ -171,6 +194,6 @@ public class GameState extends State {
                 Log.e("TAG", e.toString());
             }
         }
-    }
+    }*/
 
 }

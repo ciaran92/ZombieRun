@@ -18,10 +18,10 @@ import java.util.TimerTask;
 public class ZombiePlayer {
 
     public int positionX, positionY;
-    double velocityX, velocityY;
-    double gravity = 0.0;
-    boolean jumping = false;
-    boolean falling = true;
+    public boolean jumping = false;
+    public boolean falling = true;
+    public int velX, velY;
+    public double gravity = 0.0;
 
     Animation moving;
     private Rect entityBounds;
@@ -35,30 +35,27 @@ public class ZombiePlayer {
     }
 
     public void update(){
-
-        velocityY += gravity;
-        positionY += velocityY;
-
-        if(positionY > 288){
-            positionY = 288;
-            velocityY = 0.0;
-            //onGround = true;
+        if(jumping){
+            gravity -= 0.1;
+            setVelY((int)-gravity);
+            if(gravity <= 0.0){
+                jumping = false;
+                falling = true;
+            }
         }
-
-
-    }
-
-    public void startJump(){
-        /*if(onGround){
-            velocityY = -12.0;
-            onGround = false;
-        }*/
-    }
-
-    public void endJump(){
-        if(velocityY < -6.0){
-            velocityY = -6.0;
+        if(falling){
+            gravity += 0.1;
+            setVelY((int)gravity);
+        }else{
+            if(!falling && !jumping){
+                gravity = 0.0;
+                falling = true;
+            }
         }
+        positionX += 5;
+        positionY += velY;
+
+        GameView.getGameCamera().centerOnPlayer(ZombiePlayer.this);
     }
 
     public void moveLeft(){
@@ -72,7 +69,7 @@ public class ZombiePlayer {
     }
 
     public void render(Drawer g){
-        g.drawImage(getCurrentAnimationFrame(), (int)(positionX - GameView.getGameCamera().getxOffset()), positionX, 48, 64);
+        g.drawImage(getCurrentAnimationFrame(), (int)(positionX - GameView.getGameCamera().getxOffset()), positionY, 48, 64);
         g.drawRect(entityBounds);
     }
 
@@ -86,5 +83,7 @@ public class ZombiePlayer {
         return moving.getCurrentFrame();
     }
 
-
+    public void setVelY(int velY) {
+        this.velY = velY;
+    }
 }
