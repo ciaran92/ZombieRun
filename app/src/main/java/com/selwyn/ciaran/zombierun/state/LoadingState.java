@@ -2,6 +2,7 @@ package com.selwyn.ciaran.zombierun.state;
 
 import android.view.MotionEvent;
 
+import com.selwyn.ciaran.zombierun.entities.World;
 import com.selwyn.ciaran.zombierun.game.Assets;
 import com.selwyn.ciaran.zombierun.utilities.Drawer;
 
@@ -12,6 +13,7 @@ public class LoadingState extends State {
     @Override
     public void init() {
         Assets.load();
+        World.load(Assets.level);
     }
 
     @Override
@@ -28,4 +30,5 @@ public class LoadingState extends State {
     public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
         return false;
     }
+
 }

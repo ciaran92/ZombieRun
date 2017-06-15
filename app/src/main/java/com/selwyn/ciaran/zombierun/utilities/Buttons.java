@@ -2,6 +2,7 @@ package com.selwyn.ciaran.zombierun.utilities;
 
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.widget.Button;
 
 /**
  * Created by Ciaran on 24/05/2017.

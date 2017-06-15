@@ -10,6 +10,8 @@ import com.selwyn.ciaran.zombierun.utilities.Drawer;
  */
 public abstract class State {
 
+    public boolean paused = false;
+
     public void setCurrentState(State newState){
         GameMain.gameView.setCurrentState(newState);
     }

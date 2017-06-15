@@ -48,4 +48,11 @@ public class Drawer {
         paint.setStyle(Paint.Style.STROKE);
         canvas.drawRect(rect, paint);
     }
+    public void drawRect(int x, int y, int width, int height){
+
+        paint.setColor(Color.RED);
+        paint.setStyle(Paint.Style.STROKE);
+        canvas.drawRect(x, y, x + width, y + height, paint);
+    }
+
 }

@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -61,6 +62,7 @@ public class GameView extends SurfaceView{
             @Override
             public void surfaceDestroyed(SurfaceHolder holder) {
                 Log.d("GameView", "Surface destroyed");
+                pauseGame();
             }
         });
     }
@@ -68,10 +70,20 @@ public class GameView extends SurfaceView{
 
     public void update(){
         //Log.d("GameView", "ive been called");
-        currentState.update();
+        if(currentState.paused){
+            try {
+                mainThread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }else{
+            currentState.update();
 
+        }
         currentState.render(drawer);
         render();
+
+
     }
 
     private void render(){
@@ -92,6 +104,17 @@ public class GameView extends SurfaceView{
         gameCamera = new Camera(0,0);
     }
 
+    public void pauseGame(){
+        mainThread.setRunning(false);
+        while(mainThread.isAlive()){
+            try {
+                mainThread.join();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void setCurrentState(State newState){
         System.gc();
         newState.init();
@@ -109,5 +132,8 @@ public class GameView extends SurfaceView{
     public static Camera getGameCamera(){
         return gameCamera;
     }
+
+
+
 
 }

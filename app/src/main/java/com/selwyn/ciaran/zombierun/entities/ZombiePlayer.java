@@ -20,41 +20,58 @@ public class ZombiePlayer {
     public int positionX, positionY;
     public boolean jumping = false;
     public boolean falling = true;
+    public boolean running = true;
     public int velX, velY;
     public double gravity = 0.0;
 
     Animation moving;
+    Animation playerJumpAnim;
     private Rect entityBounds;
 
     public ZombiePlayer(){
-        positionX = 160+48;
-        positionY = 352-64;
+        positionX = 50;
+        positionY = 288;
 
-        moving = new Animation(50, Assets.player1);
-        entityBounds = new Rect(positionX, positionY, positionX+48, positionY+64);
+        moving = new Animation(100, Assets.player1, false);
+        playerJumpAnim = new Animation(100, Assets.playerJump, true);
+        //entityBounds = new Rect(positionX - (int)GameView.getGameCamera().getxOffset(), positionY, 48 + (positionX - (int)GameView.getGameCamera().getxOffset()), positionY+64);
+        entityBounds = new Rect();
     }
 
     public void update(){
-        if(jumping){
-            gravity -= 0.1;
-            setVelY((int)-gravity);
-            if(gravity <= 0.0){
-                jumping = false;
-                falling = true;
-            }
-        }
-        if(falling){
-            gravity += 0.1;
-            setVelY((int)gravity);
+        positionY += velY;
+        //positionX += velX;
+        //System.out.println("bottom: " + World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32]);
+        //System.out.println("world: " + (positionY + (entityBounds.bottom - entityBounds.top)));
+        if(World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 1 || World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 2 || World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 3
+                || World.level[(positionX + (entityBounds.right-entityBounds.left))/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 1 || World.level[(positionX + (entityBounds.right-entityBounds.left))/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 2
+                || World.level[(positionX + (entityBounds.right-entityBounds.left))/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 3){
+            //System.out.println("echo");
+            velY = 0;
+            if(falling) falling = false;
+            running = true;
         }else{
             if(!falling && !jumping){
                 gravity = 0.0;
                 falling = true;
             }
         }
+        if(jumping){
+            gravity -= 0.3;
+            //System.out.println("gravity " + gravity);
+            setVelY ((int)-gravity);
+            if(gravity <= 0.0){
+                jumping = false;
+                falling = true;
+            }
+        }
+        if(falling){
+            gravity += 0.4;
+            running = false;
+            setVelY((int)gravity);
+        }
         positionX += 5;
-        positionY += velY;
-
+        //positionY += velY;
         GameView.getGameCamera().centerOnPlayer(ZombiePlayer.this);
     }
 
@@ -70,6 +87,10 @@ public class ZombiePlayer {
 
     public void render(Drawer g){
         g.drawImage(getCurrentAnimationFrame(), (int)(positionX - GameView.getGameCamera().getxOffset()), positionY, 48, 64);
+        entityBounds.left = (int)(positionX - GameView.getGameCamera().getxOffset());
+        entityBounds.right = 48 + entityBounds.left;
+        entityBounds.top = positionY;
+        entityBounds.bottom = 64 + entityBounds.top;
         g.drawRect(entityBounds);
     }
 
@@ -80,10 +101,20 @@ public class ZombiePlayer {
 
 
     public Bitmap getCurrentAnimationFrame(){
-        return moving.getCurrentFrame();
+
+        if(jumping){
+            return playerJumpAnim.getCurrentFrame();
+        }else{
+            return moving.getCurrentFrame();
+        }
+
     }
 
     public void setVelY(int velY) {
         this.velY = velY;
+    }
+
+    public void setGravity(double gravity){
+        this.gravity = gravity;
     }
 }

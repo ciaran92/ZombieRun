@@ -30,6 +30,7 @@ public class MenuState extends State{
         playBtn.render(g);
     }
 
+
     @Override
     public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
 
@@ -48,4 +49,5 @@ public class MenuState extends State{
         }
         return true;
     }
+
 }

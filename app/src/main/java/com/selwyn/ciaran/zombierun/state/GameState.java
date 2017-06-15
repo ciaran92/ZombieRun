@@ -6,6 +6,9 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.view.MotionEvent;
 
+import com.selwyn.ciaran.zombierun.entities.Controller;
+import com.selwyn.ciaran.zombierun.entities.Tile;
+import com.selwyn.ciaran.zombierun.entities.World;
 import com.selwyn.ciaran.zombierun.entities.ZombiePlayer;
 import com.selwyn.ciaran.zombierun.game.Assets;
 import com.selwyn.ciaran.zombierun.game.GameMain;
@@ -19,17 +22,23 @@ import com.selwyn.ciaran.zombierun.utilities.Drawer;
 public class GameState extends State {
 
     ZombiePlayer thePlayer;
-    private Buttons btnLeft, btnRight;
+    private Buttons btnLeft, btnRight, btnPause, btnExit, btnContinue, btnRestart;
 
     boolean flag = false;
     //DoWork doWork;
     int count = 0;
+    Controller c = new Controller();
 
     @Override
     public void init() {
         Log.d("dimens", Assets.level.getHeight() + " " + Assets.level.getWidth() + "");
-        btnLeft = new Buttons(24, GameMain.GAME_HEIGHT - 48, 32 + 24, 32 + (GameMain.GAME_HEIGHT - 48), Assets.btnLeft, Assets.btnLeft);
-        btnRight = new Buttons(GameMain.GAME_WIDTH - 48, GameMain.GAME_HEIGHT - 48, 32 + (GameMain.GAME_WIDTH - 48), 32 + (GameMain.GAME_HEIGHT - 48), Assets.btnRight, Assets.btnRight);
+        btnLeft = new Buttons(24, GameMain.GAME_HEIGHT - 120, 96 + 24, GameMain.GAME_HEIGHT - 24, Assets.btnRight, Assets.btnRight);
+        btnRight = new Buttons(GameMain.GAME_WIDTH - 120, GameMain.GAME_HEIGHT - 120, GameMain.GAME_WIDTH - 24, GameMain.GAME_HEIGHT - 24, Assets.btnLeft, Assets.btnLeft);
+        btnPause = new Buttons(GameMain.GAME_WIDTH - 53, 5, GameMain.GAME_WIDTH - 5, 53, Assets.pauseBtn, Assets.pauseBtn);
+
+        btnExit = new Buttons((GameMain.GAME_WIDTH/2)-200, (GameMain.GAME_HEIGHT/2) - 40, (GameMain.GAME_WIDTH/2)-55, (GameMain.GAME_HEIGHT/2) + 2, Assets.exit, Assets.exitHover);
+        btnContinue = new Buttons((GameMain.GAME_WIDTH/2)+50, (GameMain.GAME_HEIGHT/2) - 40, (GameMain.GAME_WIDTH/2)+195, (GameMain.GAME_HEIGHT/2) + 2, Assets.play, Assets.playHover);
+        btnRestart = new Buttons((GameMain.GAME_WIDTH/2)-30, (GameMain.GAME_HEIGHT/2) + 40, (GameMain.GAME_WIDTH/2)+30, (GameMain.GAME_HEIGHT/2) + 92, Assets.restart, Assets.restartHover);
         thePlayer = new ZombiePlayer();
     }
 
@@ -40,17 +49,27 @@ public class GameState extends State {
 
     @Override
     public void render(Drawer g) {
-        g.drawImage(Assets.backdrop, 0, 0, GameMain.GAME_WIDTH, GameMain.GAME_HEIGHT);
-        g.drawImage(Assets.pauseBtn, GameMain.GAME_WIDTH - 48, 5);
 
-        loadLevel(Assets.level, g);
-        btnLeft.render(g);
-        btnRight.render(g);
-        thePlayer.render(g);
-        g.drawImage(Assets.sideTile1, 32, 32, 32, 32);
-        g.drawImage(Assets.sideTile2, 0, 0, 32, 32);
+        if(paused){
+            g.drawImage(Assets.pauseMenu, (GameMain.GAME_WIDTH/2) - 250, (GameMain.GAME_HEIGHT/2) - 150);
+            btnExit.render(g);
+            btnContinue.render(g);
+            btnRestart.render(g);
+        }else{
+
+            g.drawImage(Assets.backdrop, 0, 0, GameMain.GAME_WIDTH, GameMain.GAME_HEIGHT);
+            loadLevel(Assets.level, g);
+            btnLeft.render(g);
+            btnRight.render(g);
+            btnPause.render(g);
+            thePlayer.render(g);
+        }
+
+
+
 
     }
+
 
     private void loadLevel(Bitmap image, Drawer g) {
         int w = image.getWidth();
@@ -70,23 +89,31 @@ public class GameState extends State {
                 int blue = (pixel) & 0xff;
 
                 if (red == 0 && green == 0 && blue == 0) {
+                    World.level[x][y] = 0;
                     g.drawImage(Assets.baseTile, x * 32 - (int) GameView.getGameCamera().getxOffset(), y * 32, 32, 32);
                 }
                 if (red == 64 && green == 64 && blue == 64) {
+                    World.level[x][y] = 1;
                     g.drawImage(Assets.surfaceTile, x * 32 - (int) GameView.getGameCamera().getxOffset(), y * 32, 32, 32);
                 }
                 if (red == 0 && green == 38 && blue == 255) {
+                    World.level[x][y] = 2;
                     g.drawImage(Assets.cornerTile2, x * 32 - (int) GameView.getGameCamera().getxOffset(), y * 32, 32, 32);
                 }
                 if (red == 255 && green == 0 && blue == 0) {
+                    World.level[x][y] = 3;
                     g.drawImage(Assets.cornerTile1, x * 32 - (int) GameView.getGameCamera().getxOffset(), y * 32, 32, 32);
                 }
                 if (red == 255 && green == 216 && blue == 0) {
+                    World.level[x][y] = 4;
                     g.drawImage(Assets.sideTile2, x * 32 - (int) GameView.getGameCamera().getxOffset(), y * 32, 32, 32);
                 }
                 if (red == 255 && green == 0 && blue == 220) {
+                    World.level[x][y] = 5;
                     g.drawImage(Assets.sideTile1, x * 32 - (int) GameView.getGameCamera().getxOffset(), y * 32, 32, 32);
+
                 }
+
             }
         }
     }
@@ -97,25 +124,72 @@ public class GameState extends State {
 
     @Override
     public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
-        String method;
-        if (e.getAction() == MotionEvent.ACTION_DOWN) {
-            btnLeft.onTouch(scaledX, scaledY);
-            if(btnLeft.isBtnPressed(scaledX,scaledY)){
-                if(!thePlayer.jumping){
-                    thePlayer.jumping = true;
-                    thePlayer.gravity = 10.0;
+        if(!paused) {
+            if (thePlayer.running == true) {
+                if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                    btnLeft.onTouch(scaledX, scaledY);
+                }
+
+                if (e.getAction() == MotionEvent.ACTION_UP) {
+                    if (btnLeft.isBtnPressed(scaledX, scaledY)) {
+                        btnLeft.cancel();
+                        if (!thePlayer.jumping) {
+                            thePlayer.jumping = true;
+                            //thePlayer.running = false;
+                            thePlayer.setGravity(10.0);
+                        }
+                    } else {
+                        btnLeft.cancel();
+                    }
                 }
             }
         }
+
+        if(paused){
+            if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                btnContinue.onTouch(scaledX, scaledY);
+                btnExit.onTouch(scaledX, scaledY);
+            }
+
+            if (e.getAction() == MotionEvent.ACTION_UP) {
+                if (btnContinue.isBtnPressed(scaledX, scaledY)) {
+                    btnContinue.cancel();
+                    paused = false;
+                }
+                if(btnExit.isBtnPressed(scaledX, scaledY)){
+                    btnExit.cancel();
+                    setCurrentState(new MenuState());
+                }
+                else {
+                    btnLeft.cancel();
+                }
+            }
+        }
+
+
+        if(e.getAction() == MotionEvent.ACTION_DOWN){
+            btnPause.onTouch(scaledX, scaledY);
+        }
         if(e.getAction() == MotionEvent.ACTION_UP){
-            btnLeft.cancel();
+            if(paused == false){
+                if(btnPause.isBtnPressed(scaledX, scaledY)){
+                    btnPause.cancel();
+                    paused = true;
+                }
+            }
+            if(paused == true){
+                if(btnPause.isBtnPressed(scaledX, scaledY)){
+                    btnPause.cancel();
+                    paused = false;
+                }
+            }
+
         }
-        else{
-            thePlayer.update();
-        }
+
 
         return true;
     }
+
 
     /*@Override
     public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {

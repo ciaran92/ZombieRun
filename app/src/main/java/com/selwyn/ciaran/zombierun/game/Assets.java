@@ -13,35 +13,39 @@ import android.graphics.BitmapFactory.Options;
 public class Assets {
 
     public static Bitmap homeScreen, playBtn, playBtnPressed, level, player, grass, backdrop, pauseBtn, tileset, baseTile, surfaceTile, cornerTile1, cornerTile2,
-            sideTile1, sideTile2, buttons, btnLeft, btnRight;
+            sideTile1, sideTile2, buttons, btnLeft, btnRight, voidTile, playerTile, pauseTileset, pauseMenu, exit, exitHover, play, playHover, restart, restartHover;
 
-    public static Bitmap[] player1;
+    public static Bitmap[] player1, playerJump;
 
     public static void load(){
         homeScreen = loadBitmap("menuScreen.png", false);
         playBtn = loadBitmap("play.png", false);
         playBtnPressed = loadBitmap("playPressed.png", false);
         level = loadBitmap("level.png", false);
-        tileset = loadBitmap("platformertiles.png", false);
+        tileset = loadBitmap("tiles.png", false);
         player = loadBitmap("player.png", false);
         grass = loadBitmap("grass.png", false);
         backdrop = loadBitmap("backdrop.png", false);
         pauseBtn = loadBitmap("pauseBtn.png", false);
         buttons = loadBitmap("buttons.png", false);
+        voidTile = loadBitmap("voidtile.png", false);
+        playerTile = loadBitmap("mvSatyr.png", false);
+        pauseMenu = loadBitmap("pauseMenu.png", false);
+        pauseTileset = loadBitmap("pausebtns.png", false);
 
-        player1 = new Bitmap[11];
+        player1 = new Bitmap[6];
 
-        player1[0] = loadBitmap("walk0.png", false);
-        player1[1] = loadBitmap("walk1.png", false);
-        player1[2] = loadBitmap("walk2.png", false);
-        player1[3] = loadBitmap("walk3.png", false);
-        player1[4] = loadBitmap("walk4.png", false);
-        player1[5] = loadBitmap("walk5.png", false);
-        player1[6] = loadBitmap("walk6.png", false);
-        player1[7] = loadBitmap("walk7.png", false);
-        player1[8] = loadBitmap("walk8.png", false);
-        player1[9] = loadBitmap("walk9.png", false);
-        player1[10] = loadBitmap("walk10.png", false);
+        player1[0] = Bitmap.createBitmap(playerTile, 32, 0, 32, 64);
+        player1[1] = Bitmap.createBitmap(playerTile, 64, 0, 32, 64);
+        player1[2] = Bitmap.createBitmap(playerTile, 96, 0, 32, 64);
+        player1[3] = Bitmap.createBitmap(playerTile, 128, 0, 32, 64);
+        player1[4] = Bitmap.createBitmap(playerTile, 160, 0, 32, 64);
+        player1[5] = Bitmap.createBitmap(playerTile, 192, 0, 32, 64);
+
+        playerJump = new Bitmap[3];
+        playerJump[0] = Bitmap.createBitmap(playerTile, 224, 64, 32, 64);
+        playerJump[1] = Bitmap.createBitmap(playerTile, 256, 64, 32, 64);
+        playerJump[2] = Bitmap.createBitmap(playerTile, 288, 64, 32, 64);
 
         baseTile = Bitmap.createBitmap(tileset, 32, 32, 32, 32);
         surfaceTile = Bitmap.createBitmap(tileset, 32, 0, 32, 32);
@@ -50,8 +54,15 @@ public class Assets {
         sideTile1 = Bitmap.createBitmap(tileset, 0, 32, 32, 32);
         sideTile2 = Bitmap.createBitmap(tileset, 64, 32, 32, 32);
 
-        btnLeft = Bitmap.createBitmap(buttons, 0, 0, 32, 32);
-        btnRight = Bitmap.createBitmap(buttons, 32, 0, 32, 32);
+        exit = Bitmap.createBitmap(pauseTileset, 0, 0, 145, 42);
+        exitHover = Bitmap.createBitmap(pauseTileset, 145, 0, 145, 42);
+        play = Bitmap.createBitmap(pauseTileset, 0, 42, 145, 42);
+        playHover = Bitmap.createBitmap(pauseTileset, 145, 42, 145, 42);
+        restart = Bitmap.createBitmap(pauseTileset, 0, 84, 60, 42);
+        restartHover = Bitmap.createBitmap(pauseTileset, 60, 84, 60, 42);
+
+        btnLeft = Bitmap.createBitmap(buttons, 0, 0, 96, 96);
+        btnRight = Bitmap.createBitmap(buttons, 96, 0, 96, 96);
     }
 
     private static Bitmap loadBitmap(String filename, boolean transparency){

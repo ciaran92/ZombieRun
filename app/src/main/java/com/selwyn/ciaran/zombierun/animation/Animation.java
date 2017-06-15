@@ -12,10 +12,12 @@ public class Animation {
     int speed, index;
     long lastTime, timer;
     Bitmap[] frames;
+    boolean jumping;
 
-    public Animation(int speed, Bitmap[] frames){
+    public Animation(int speed, Bitmap[] frames, boolean jumping){
         this.speed = speed;
         this.frames = frames;
+        this.jumping = jumping;
         index = 0;
         timer = 0;
         lastTime = System.currentTimeMillis();
@@ -25,17 +27,33 @@ public class Animation {
         timer += System.currentTimeMillis() - lastTime;
         lastTime = System.currentTimeMillis();
 
-        if(timer > speed){
-            index++;
+        if(!jumping){
+            if(timer > speed){
+                index++;
+                timer = 0;
+                if(index >= frames.length){
+                    index = 0;
+                }
+            }
+        }else{
+            index = 0;
             timer = 0;
-            if(index >= frames.length){
-                index = 0;
+            if(timer > speed){
+                index++;
+                timer = 0;
+
+                if(index == frames.length){
+                    System.out.println("length " + index);
+                    return;
+                }
             }
         }
+
     }
 
     public Bitmap getCurrentFrame(){
         tick();
+
         return frames[index];
     }
 }
