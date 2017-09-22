@@ -1,6 +1,7 @@
 package com.selwyn.ciaran.zombierun.state;
 
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.selwyn.ciaran.zombierun.game.GameMain;
 import com.selwyn.ciaran.zombierun.utilities.Drawer;
@@ -19,5 +20,5 @@ public abstract class State {
     public abstract void init();
     public abstract void update();
     public abstract void render(Drawer g);
-    public abstract boolean onTouch(MotionEvent e, int scaledX, int scaledY);
+    public abstract boolean onTouch(View v, MotionEvent e, int scaledX, int scaledY);
 }

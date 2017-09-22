@@ -1,6 +1,8 @@
 package com.selwyn.ciaran.zombierun.entities;
 
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.Rect;
 import android.widget.GridView;
 
@@ -21,8 +23,10 @@ public class ZombiePlayer {
     public boolean jumping = false;
     public boolean falling = true;
     public boolean running = true;
-    public int velX, velY;
+    public double velY = 0;
     public double gravity = 0.0;
+    private final double MIN_HEIGHT = 220;
+    public double jumpTime;
 
     Animation moving;
     Animation playerJumpAnim;
@@ -30,7 +34,7 @@ public class ZombiePlayer {
 
     public ZombiePlayer(){
         positionX = 50;
-        positionY = 288;
+        positionY = 258;
 
         moving = new Animation(100, Assets.player1, false);
         playerJumpAnim = new Animation(100, Assets.playerJump, true);
@@ -39,10 +43,12 @@ public class ZombiePlayer {
     }
 
     public void update(){
+        System.out.println("posY  " + positionY);
         positionY += velY;
         //positionX += velX;
         //System.out.println("bottom: " + World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32]);
         //System.out.println("world: " + (positionY + (entityBounds.bottom - entityBounds.top)));
+        //below statement checks the points on the bounding box in order: top left, top right, bottom left, bottom right
         if(World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 1 || World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 2 || World.level[positionX/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 3
                 || World.level[(positionX + (entityBounds.right-entityBounds.left))/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 1 || World.level[(positionX + (entityBounds.right-entityBounds.left))/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 2
                 || World.level[(positionX + (entityBounds.right-entityBounds.left))/32][(positionY + (entityBounds.bottom - entityBounds.top))/32] == 3){
@@ -57,45 +63,45 @@ public class ZombiePlayer {
             }
         }
         if(jumping){
-            gravity -= 0.3;
-            //System.out.println("gravity " + gravity);
-            setVelY ((int)-gravity);
-            if(gravity <= 0.0){
+            gravity -= 0.35;
+            setVelY(-gravity);
+
+            if(gravity<=0){
+                //System.out.println("working");
                 jumping = false;
                 falling = true;
             }
         }
+
         if(falling){
-            gravity += 0.4;
+            gravity += 0.35;
             running = false;
-            setVelY((int)gravity);
+            setVelY(gravity);
         }
+
         positionX += 5;
         //positionY += velY;
         GameView.getGameCamera().centerOnPlayer(ZombiePlayer.this);
     }
 
-    public void moveLeft(){
-        positionX-=5;
-        GameView.getGameCamera().centerOnPlayer(ZombiePlayer.this);
-    }
-
-    public void moveRight(){
-        positionX+=5;
-        GameView.getGameCamera().centerOnPlayer(ZombiePlayer.this);
-    }
-
     public void render(Drawer g){
-        g.drawImage(getCurrentAnimationFrame(), (int)(positionX - GameView.getGameCamera().getxOffset()), positionY, 48, 64);
+
+        g.drawImage(getCurrentAnimationFrame(), (int)(positionX - GameView.getGameCamera().getxOffset()), positionY, 64, 96);
         entityBounds.left = (int)(positionX - GameView.getGameCamera().getxOffset());
-        entityBounds.right = 48 + entityBounds.left;
+        entityBounds.right = 64 + entityBounds.left;
         entityBounds.top = positionY;
-        entityBounds.bottom = 64 + entityBounds.top;
+        entityBounds.bottom = 96 + entityBounds.top;
         g.drawRect(entityBounds);
+        //System.out.println("posY " + positionY);
+
     }
 
     public int getX(){
         return positionX;
+    }
+
+    public int getY(){
+        return positionY;
     }
 
 
@@ -110,7 +116,7 @@ public class ZombiePlayer {
 
     }
 
-    public void setVelY(int velY) {
+    public void setVelY(double velY) {
         this.velY = velY;
     }
 

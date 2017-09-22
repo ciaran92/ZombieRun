@@ -1,13 +1,12 @@
 package com.selwyn.ciaran.zombierun.state;
 
 import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 
+import com.selwyn.ciaran.zombierun.entities.Bullet;
 import com.selwyn.ciaran.zombierun.entities.Controller;
-import com.selwyn.ciaran.zombierun.entities.Tile;
 import com.selwyn.ciaran.zombierun.entities.World;
 import com.selwyn.ciaran.zombierun.entities.ZombiePlayer;
 import com.selwyn.ciaran.zombierun.game.Assets;
@@ -22,18 +21,22 @@ import com.selwyn.ciaran.zombierun.utilities.Drawer;
 public class GameState extends State {
 
     ZombiePlayer thePlayer;
-    private Buttons btnLeft, btnRight, btnPause, btnExit, btnContinue, btnRestart;
+    private Buttons btnLeft, btnShoot, btnPause, btnExit, btnContinue, btnRestart;
 
     boolean flag = false;
     //DoWork doWork;
     int count = 0;
     Controller c = new Controller();
+    double time = 0;
+    int fireRate = 0;
+    boolean playerShooting = false;
+    boolean playerJumping = false;
 
     @Override
     public void init() {
         Log.d("dimens", Assets.level.getHeight() + " " + Assets.level.getWidth() + "");
         btnLeft = new Buttons(24, GameMain.GAME_HEIGHT - 120, 96 + 24, GameMain.GAME_HEIGHT - 24, Assets.btnRight, Assets.btnRight);
-        btnRight = new Buttons(GameMain.GAME_WIDTH - 120, GameMain.GAME_HEIGHT - 120, GameMain.GAME_WIDTH - 24, GameMain.GAME_HEIGHT - 24, Assets.btnLeft, Assets.btnLeft);
+        btnShoot = new Buttons(GameMain.GAME_WIDTH - 120, GameMain.GAME_HEIGHT - 120, GameMain.GAME_WIDTH - 24, GameMain.GAME_HEIGHT - 24, Assets.btnLeft, Assets.btnLeft);
         btnPause = new Buttons(GameMain.GAME_WIDTH - 53, 5, GameMain.GAME_WIDTH - 5, 53, Assets.pauseBtn, Assets.pauseBtn);
 
         btnExit = new Buttons((GameMain.GAME_WIDTH/2)-200, (GameMain.GAME_HEIGHT/2) - 40, (GameMain.GAME_WIDTH/2)-55, (GameMain.GAME_HEIGHT/2) + 2, Assets.exit, Assets.exitHover);
@@ -44,7 +47,15 @@ public class GameState extends State {
 
     @Override
     public void update() {
+        if(fireRate > 0) fireRate--;
         thePlayer.update();
+        if(playerShooting){
+            shoot();
+        }
+        if(playerJumping){
+            jump();
+        }
+        c.update();
     }
 
     @Override
@@ -60,9 +71,10 @@ public class GameState extends State {
             g.drawImage(Assets.backdrop, 0, 0, GameMain.GAME_WIDTH, GameMain.GAME_HEIGHT);
             loadLevel(Assets.level, g);
             btnLeft.render(g);
-            btnRight.render(g);
+            btnShoot.render(g);
             btnPause.render(g);
             thePlayer.render(g);
+            c.draw(g);
         }
 
 
@@ -123,35 +135,68 @@ public class GameState extends State {
     }
 
     @Override
-    public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
+    public boolean onTouch(View v, MotionEvent event, int scaledX, int scaledY) {
+
+        int pointerIndex = event.getActionIndex();
+        int pointerId = event.getPointerId(pointerIndex);
+        int action = event.getActionMasked();
+        int scaledX2 = (int) ((event.getX(pointerIndex) / v.getWidth()) * GameMain.GAME_WIDTH);
+        int scaledY2 = (int) ((event.getY(pointerIndex) / v.getHeight()) * GameMain.GAME_HEIGHT);
         if(!paused) {
-            if (thePlayer.running == true) {
-                if (e.getAction() == MotionEvent.ACTION_DOWN) {
-                    btnLeft.onTouch(scaledX, scaledY);
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                case MotionEvent.ACTION_POINTER_DOWN: {
+                    btnLeft.onTouch(scaledX2, scaledY2);
+                    btnShoot.onTouch(scaledX2, scaledY2);
+                    btnPause.onTouch(scaledX2, scaledY2);
+
+                    if (thePlayer.running == true) {
+                        if (btnLeft.isBtnPressed(scaledX2, scaledY2)) {
+                            //System.out.println("Down id = " + pointerId + " " + scaledX2 + ", " + scaledY2 + " jump touched");
+                            //time = System.currentTimeMillis();
+                            thePlayer.jumping = true;
+                            thePlayer.setGravity(10);
+                        }
+                    }
+                    if (btnShoot.isBtnPressed(scaledX2, scaledY2)) {
+                        playerShooting = true;
+                    }
+                    break;
                 }
 
-                if (e.getAction() == MotionEvent.ACTION_UP) {
-                    if (btnLeft.isBtnPressed(scaledX, scaledY)) {
-                        btnLeft.cancel();
-                        if (!thePlayer.jumping) {
-                            thePlayer.jumping = true;
-                            //thePlayer.running = false;
-                            thePlayer.setGravity(10.0);
-                        }
-                    } else {
-                        btnLeft.cancel();
+
+                case MotionEvent.ACTION_POINTER_UP:
+                case MotionEvent.ACTION_UP: {
+                    btnLeft.onTouch(scaledX2, scaledY2);
+                    btnShoot.onTouch(scaledX2, scaledY2);
+                    btnPause.onTouch(scaledX2, scaledY2);
+
+                    if (btnLeft.isBtnPressed(scaledX2, scaledY2)) {
+                        thePlayer.jumping = false;
                     }
+
+                    if (btnShoot.isBtnPressed(scaledX2, scaledY2)) {
+                        playerShooting = false;
+                    }
+                    if(paused == false){
+                        if(btnPause.isBtnPressed(scaledX, scaledY)){
+                            btnPause.cancel();
+                            paused = true;
+                        }
+                    }
+                    break;
                 }
+
             }
         }
 
         if(paused){
-            if (e.getAction() == MotionEvent.ACTION_DOWN) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
                 btnContinue.onTouch(scaledX, scaledY);
                 btnExit.onTouch(scaledX, scaledY);
             }
 
-            if (e.getAction() == MotionEvent.ACTION_UP) {
+            if (event.getAction() == MotionEvent.ACTION_UP) {
                 if (btnContinue.isBtnPressed(scaledX, scaledY)) {
                     btnContinue.cancel();
                     paused = false;
@@ -165,109 +210,23 @@ public class GameState extends State {
                 }
             }
         }
-
-
-        if(e.getAction() == MotionEvent.ACTION_DOWN){
-            btnPause.onTouch(scaledX, scaledY);
-        }
-        if(e.getAction() == MotionEvent.ACTION_UP){
-            if(paused == false){
-                if(btnPause.isBtnPressed(scaledX, scaledY)){
-                    btnPause.cancel();
-                    paused = true;
-                }
-            }
-            if(paused == true){
-                if(btnPause.isBtnPressed(scaledX, scaledY)){
-                    btnPause.cancel();
-                    paused = false;
-                }
-            }
-
-        }
-
-
         return true;
     }
 
-
-    /*@Override
-    public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
-        String method;
-        if (e.getAction() == MotionEvent.ACTION_DOWN) {
-            btnLeft.onTouch(scaledX, scaledY);
-            btnRight.onTouch(scaledX, scaledY);
-            if(btnLeft.isBtnPressed(scaledX,scaledY)){
-                flag = true;
-                method = "left";
-                doWork = new DoWork();
-                doWork.execute(method);
-            }
-            if(btnRight.isBtnPressed(scaledX, scaledY)){
-                flag = true;
-                method = "right";
-                doWork = new DoWork();
-                doWork.execute(method);
-            }
+    private void shoot(){
+        if(fireRate <= 0){
+            c.addBullet(new Bullet(thePlayer.getX(), thePlayer.getY()));
+            fireRate = Bullet.FIRE_RATE;
         }
-        if(e.getAction() == MotionEvent.ACTION_UP){
+    }
 
-                btnLeft.cancel();
-                btnRight.cancel();
-                flag = false;
-                doWork.cancel(false);
-        }
+    private void jump() {
 
-        return true;
-    }*/
+    }
 
+    private int getIndex (MotionEvent event){
+        int idx = (event.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) & MotionEvent.ACTION_POINTER_INDEX_SHIFT;
 
-    /*class DoWork extends AsyncTask<String, Void, Void> {
-
-
-        @Override
-        protected void onPreExecute() {
-
-        }
-
-        @Override
-        protected Void doInBackground(String... params) {
-            String method = params[0];
-
-            if(method.equals("left"))
-            while (flag) {
-                synchronized (this){
-                    this.sleep(13);
-                    thePlayer.moveLeft();
-                }
-            }
-            if(method.equals("right"))
-                while (flag) {
-                    synchronized (this){
-                        this.sleep(13);
-                        thePlayer.moveRight();
-                    }
-                }
-            return null;
-        }
-
-        @Override
-        protected void onProgressUpdate(Void... values){
-
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-
-        }
-
-        private void sleep(int delay) {
-            try {
-                Thread.sleep(delay);
-            } catch (InterruptedException e) {
-                Log.e("TAG", e.toString());
-            }
-        }
-    }*/
-
+        return idx;
+    }
 }

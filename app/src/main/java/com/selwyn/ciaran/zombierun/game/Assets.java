@@ -13,7 +13,8 @@ import android.graphics.BitmapFactory.Options;
 public class Assets {
 
     public static Bitmap homeScreen, playBtn, playBtnPressed, level, player, grass, backdrop, pauseBtn, tileset, baseTile, surfaceTile, cornerTile1, cornerTile2,
-            sideTile1, sideTile2, buttons, btnLeft, btnRight, voidTile, playerTile, pauseTileset, pauseMenu, exit, exitHover, play, playHover, restart, restartHover;
+            sideTile1, sideTile2, buttons, btnLeft, btnRight, voidTile, playerTile, pauseTileset, pauseMenu, exit, exitHover, play, playHover, restart, restartHover,
+            run1, run2, run3, run4, run5, run6, weaponAK47;
 
     public static Bitmap[] player1, playerJump;
 
@@ -32,9 +33,15 @@ public class Assets {
         playerTile = loadBitmap("mvSatyr.png", false);
         pauseMenu = loadBitmap("pauseMenu.png", false);
         pauseTileset = loadBitmap("pausebtns.png", false);
+        run1 = loadBitmap("Run1.png", false);
+        run2 = loadBitmap("Run2.png", false);
+        run3 = loadBitmap("Run3.png", false);
+        run4 = loadBitmap("Run4.png", false);
+        run5 = loadBitmap("Run5.png", false);
+        run6 = loadBitmap("Run6.png", false);
 
         player1 = new Bitmap[6];
-
+        weaponAK47 = Bitmap.createBitmap((loadBitmap("AK47.png", false)), 0, 0, 64, 32);
         player1[0] = Bitmap.createBitmap(playerTile, 32, 0, 32, 64);
         player1[1] = Bitmap.createBitmap(playerTile, 64, 0, 32, 64);
         player1[2] = Bitmap.createBitmap(playerTile, 96, 0, 32, 64);

@@ -21,6 +21,6 @@ public class Handler implements View.OnTouchListener{
     public boolean onTouch(View v, MotionEvent event) {
         int scaledX = (int) ((event.getX() / v.getWidth()) * GameMain.GAME_WIDTH);
         int scaledY = (int) ((event.getY() / v.getHeight()) * GameMain.GAME_HEIGHT);
-        return currentState.onTouch(event, scaledX, scaledY);
+        return currentState.onTouch(v, event, scaledX, scaledY);
     }
 }

@@ -55,4 +55,11 @@ public class Drawer {
         canvas.drawRect(x, y, x + width, y + height, paint);
     }
 
+    public Canvas getCanvas() {
+        return canvas;
+    }
+
+    public Paint getPaint() {
+        return paint;
+    }
 }

@@ -9,29 +9,29 @@ import java.util.LinkedList;
  */
 public class Controller {
 
-    public LinkedList<Tile> tile = new LinkedList<Tile>();
-    Tile tempTile;
+    public LinkedList<Bullet> b = new LinkedList<Bullet>();
+    Bullet tempBullet;
 
     public void update(){
-        for(int i = 0; i < tile.size(); i++){
-            tempTile = tile.get(i);
-            tempTile.update();
+        for(int i = 0; i < b.size(); i++){
+            tempBullet = b.get(i);
+            tempBullet.update();
         }
     }
 
     public void draw(Drawer drawer){
-        for(int i = 0; i < tile.size(); i++){
-            tempTile = tile.get(i);
-            tempTile.draw(drawer);
+        for(int i = 0; i < b.size(); i++){
+            tempBullet = b.get(i);
+            tempBullet.render(drawer);
         }
     }
 
-    public void addTile(Tile block){
-        tile.add(block);
+    public void addBullet(Bullet block){
+        b.add(block);
     }
 
-    public void removeTile(Tile block){
-        tile.remove(block);
+    public void removeBullet(Bullet block){
+        b.remove(block);
     }
 
 }

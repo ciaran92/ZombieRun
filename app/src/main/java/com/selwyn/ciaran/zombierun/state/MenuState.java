@@ -2,6 +2,7 @@ package com.selwyn.ciaran.zombierun.state;
 
 import android.util.Log;
 import android.view.MotionEvent;
+import android.view.View;
 
 import com.selwyn.ciaran.zombierun.game.Assets;
 import com.selwyn.ciaran.zombierun.utilities.Buttons;
@@ -32,7 +33,7 @@ public class MenuState extends State{
 
 
     @Override
-    public boolean onTouch(MotionEvent e, int scaledX, int scaledY) {
+    public boolean onTouch(View v, MotionEvent e, int scaledX, int scaledY) {
 
         if(e.getAction() == MotionEvent.ACTION_DOWN){
             playBtn.onTouch(scaledX, scaledY);
